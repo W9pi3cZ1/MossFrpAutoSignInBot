@@ -32,7 +32,7 @@ IF EXIST olddate (
 )
 :if2
 if "%olddate%"=="%nowdate%" (
-  echo å·²ç­¾åˆ°
+  echo ÒÑÇ©µ½
   timeout /t 5
   exit
 )else (
@@ -42,32 +42,63 @@ if "%olddate%"=="%nowdate%" (
 
 :run
 
-if exist %file% (
-  set lines=lines+1
-	for /f "skip=%lines% delims=" %%a in (%base%%pwdfile%) do (set email=%%a)
-  set lines=lines+1
-  for /f "skip=%lines% delims=" %%a in (%base%%pwdfile%) do (set pwd=%%a)
-  call main.bat %email% %pwd% 2
-  
-  set lines=lines+1
-	for /f "skip=%lines% delims=" %%a in (%base%%pwdfile%) do (set email=%%a)
-  set lines=lines+1
-  for /f "skip=%lines% delims=" %%a in (%base%%pwdfile%) do (set pwd=%%a)
-  call main.bat %email% %pwd% 2
-)
-
 cd prgm
 
-call :setuser
+if exist %pwdfile% (
+  certutil -f -decode pwd pwdd
+  rename pwd pwd.old
+  rename pwdd pwd
+  goto :toif
+)else (
+  goto :first
+)
+
+:first
+call :header
 call main.bat %email% %pwd% 2
 call :setuser
 call main.bat %email% %pwd% 2
+certutil -f -encode pwdd pwd
+del /f pwdd
 exit
 
+:toif
+set /a n=0
+for /f "delims=" %%a in (%base%prgm\%pwdfile%) do (
+set /a n+=1 
+if !n!==2 set email=%%a
+)
+set /a n=0
+for /f "delims=" %%a in (%base%prgm\%pwdfile%) do (
+set /a n+=1
+if !n!==3 set pwd=%%a 
+)
+echo !email! %pwd%
+set /a n=0
+call main.bat !email! !pwd! 2
+
+for /f "delims=" %%a in (%base%prgm\%pwdfile%) do (
+set /a n+=1 
+if !n!==4 set email=%%a 
+)
+set /a n=0
+for /f "delims=" %%a in (%base%prgm\%pwdfile%) do (
+set /a n+=1 
+if !n!==5 set pwd=%%a 
+)
+set /a n=0
+echo !email! !pwd!
+call main.bat !email! !pwd! 2
+del /f pwd
+rename pwd.old pwd
+exit
+
+:header
+echo PassWord File > pwdd
+
 :setuser
-echo PassWord File > pwd
 set /P email="email:"
 set /P pwd="pwd:"
-echo %email% >> pwd
-echo %password% >> pwd
+echo %email% >> pwdd
+echo %pwd% >> pwdd
 
