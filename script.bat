@@ -46,6 +46,7 @@ if "%olddate%"=="%nowdate%" (
 cd prgm
 
 if exist %pwdfile% (
+  rem DecodePwdFile
   certutil -f -decode pwd pwdd
   rename pwd pwd.old
   rename pwdd pwd
@@ -66,6 +67,7 @@ del /f pwdd
 exit
 
 :toif
+rem ReadPwdFile
 set /a n=0
 for /f "delims=" %%a in (%base%prgm\%pwdfile%) do (
 set /a n+=1 
